@@ -840,6 +840,76 @@ suite flag_test = [] {
    };
 };
 
+#include <set>
+#include <unordered_set>
+
+suite sets = [] {
+   "std::unordered_set"_test = [] {
+      std::unordered_set<std::string> set;
+      set = {"hello", "world"};
+      std::string b{};
+      glz::write_binary(set, b);
+      
+      set.clear();
+
+      expect(glz::read_binary(set, b) == glz::error_code::none);
+
+      expect(set.count("hello") == 1);
+      expect(set.count("world") == 1);
+   };
+
+   "std::set<int>"_test = [] {
+      std::set<int> set;
+      set = {5, 4, 3, 2, 1};
+      std::string b{};
+      glz::write_binary(set, b);
+
+      set.clear();
+
+      expect(glz::read_binary(set, b) == glz::error_code::none);
+
+      expect(set.count(1) == 1);
+      expect(set.count(2) == 1);
+      expect(set.count(3) == 1);
+      expect(set.count(4) == 1);
+      expect(set.count(5) == 1);
+   };
+
+   "std::set<std::string>"_test = [] {
+      std::set<std::string> set;
+      set = {"a", "b", "c", "d", "e"};
+      std::string b{};
+      glz::write_binary(set, b);
+
+      set.clear();
+
+      expect(glz::read_binary(set, b) == glz::error_code::none);
+
+      expect(set.count("a") == 1);
+      expect(set.count("b") == 1);
+      expect(set.count("c") == 1);
+      expect(set.count("d") == 1);
+      expect(set.count("e") == 1);
+   };
+
+   "std::multiset"_test = [] {
+      std::multiset<int> set;
+      set = {5, 4, 3, 2, 1, 4, 1};
+      std::string b{};
+      glz::write_binary(set, b);
+
+      set.clear();
+
+      expect(glz::read_binary(set, b) == glz::error_code::none);
+
+      expect(set.count(1) == 2);
+      expect(set.count(2) == 1);
+      expect(set.count(3) == 1);
+      expect(set.count(4) == 2);
+      expect(set.count(5) == 1);
+   };
+};
+
 int main()
 {
    using namespace boost::ut;
