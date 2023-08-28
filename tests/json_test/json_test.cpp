@@ -3616,10 +3616,13 @@ suite custom_unique_tests = [] {
 
 struct MyNonDefaultConstructibleClass
 {
-   MyNonDefaultConstructibleClass(int x, double y) : x(x), y(y) {}
+   MyNonDefaultConstructibleClass(int32_t x, int64_t y) : x(x), y(y) {
+      z = x * y;
+   }
    
-   int x;
-   double y;
+   int32_t x{};
+   int64_t y{};
+   int64_t z{};
 };
 
 template <>
@@ -3627,26 +3630,29 @@ struct glz::meta<MyNonDefaultConstructibleClass>
 {
    using T = MyNonDefaultConstructibleClass;
    static constexpr auto value = object("x", &T::x, "y", &T::y);
-   static constexpr auto construct = constructor<T, int, double>;
+   static constexpr auto construct = constructor<T, int32_t, int64_t>;
 };
 
 suite non_default_constructible = [] {
    "non_default_constructible"_test = [] {
-      std::string s = R"({"x":5,"y":1.1})";
+      std::string s = R"({"x":5,"y":2})";
       auto c = glz::read_json<MyNonDefaultConstructibleClass>(s);
       expect(c.has_value());
       expect(c.value().x == 5);
-      expect(c.value().y == 1.1);
+      expect(c.value().y == 2);
+      expect(c.value().z == 10);
    };
    
    "non_default_constructible_vector"_test = [] {
-      std::string s = R"([{"x":5,"y":1.1},{"x":10,"y":2.2}])";
+      std::string s = R"([{"x":5,"y":2},{"x":10,"y":3}])";
       auto c = glz::read_json<std::vector<MyNonDefaultConstructibleClass>>(s);
       expect(c.has_value());
       expect(c.value()[0].x == 5);
-      expect(c.value()[0].y == 1.1);
+      expect(c.value()[0].y == 2);
+      expect(c.value()[0].z == 10);
       expect(c.value()[1].x == 10);
-      expect(c.value()[1].y == 2.2);
+      expect(c.value()[1].y == 3);
+      expect(c.value()[1].z == 30);
    };
 };
 

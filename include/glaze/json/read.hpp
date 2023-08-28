@@ -940,7 +940,7 @@ namespace glz
                      }
                      else {
                         value.resize(i + 1);
-                        //static_assert(false_v<V>, "Type must be default constructible or define a `construct` in glz::meta");
+                        //static_assert(false_v<T>, "Type must be default constructible or define a `construct` in glz::meta");
                      }
 
                      if constexpr (Opts.shrink_to_fit) {
@@ -967,7 +967,8 @@ namespace glz
                      auto element = std::apply(
                         [&](auto&&... args) { return meta_construct_v<V>(std::forward<decltype(args)>(args)...); },
                         inputs);
-                     read<json>::op<ws_handled<Opts>()>(value.emplace_back(element), ctx, it, end);
+                     read<json>::op<ws_handled<Opts>()>(element, ctx, it, end);
+                     value.emplace_back(std::move(element));
                   }
                   else {
                      read<json>::op<ws_handled<Opts>()>(value.emplace_back(), ctx, it, end);
