@@ -4979,6 +4979,13 @@ suite number_reading = [] {
       buffer = "6E19";
       expect(glz::read_json(i, buffer) == glz::error_code::parse_number_failure);
    };
+
+   "long float double"_test = [] {
+      std::string_view buffer{"0.00000000000000000000000"};
+      double d{3.14};
+      expect(!glz::read_json(d, buffer));
+      expect(d == 0.0);
+   };
 };
 
 suite whitespace_testing = [] {
@@ -4987,6 +4994,15 @@ suite whitespace_testing = [] {
       my_struct value{};
       glz::context ctx{};
       expect(glz::read_json(value, buffer) == glz::error_code::expected_end_comment);
+   };
+};
+
+suite read_as_json_raw = [] {
+   "read_as_json_raw"_test = [] {
+      static std::array<char, 128> b{};
+      my_struct obj{};
+      expect(glz::write_as_json(obj, "/i", b.data()));
+      expect(std::string_view{b.data()} == "287");
    };
 };
 

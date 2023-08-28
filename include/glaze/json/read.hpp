@@ -1025,11 +1025,21 @@ namespace glz
                break;
             }
             case '/': {
-               skip_ws<Opts>(ctx, it, end);
+               skip_comment(ctx, it, end);
                if (bool(ctx.error)) [[unlikely]]
                   return {};
                break;
             }
+            case '{':
+               skip_until_closed<'{', '}'>(ctx, it, end);
+               if (bool(ctx.error)) [[unlikely]]
+                  return {};
+               break;
+            case '[':
+               skip_until_closed<'[', ']'>(ctx, it, end);
+               if (bool(ctx.error)) [[unlikely]]
+                  return {};
+               break;
             case '"': {
                skip_string<Opts>(ctx, it, end);
                if (bool(ctx.error)) [[unlikely]]

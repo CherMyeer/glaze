@@ -198,7 +198,9 @@ namespace glz
                      return var.index();
                   }();
 
-                  dump_type(tag::additional, args...);
+                  constexpr uint8_t tag = tag::extensions | 0b00001'000;
+
+                  dump_type(tag, args...);
                   dump_compressed_int<index>(args...);
                   write<binary>::op<Opts>(v, ctx, std::forward<Args>(args)...);
                },
@@ -314,7 +316,7 @@ namespace glz
                }
             }
             else {
-               constexpr uint8_t tag = tag::untyped_array | (byte_count<V> << 3);
+               constexpr uint8_t tag = tag::generic_array | (byte_count<V> << 3);
                dump_type(tag, args...);
                dump_compressed_int<Opts>(value.size(), args...);
 
@@ -334,8 +336,8 @@ namespace glz
             using Key = typename T::first_type;
 
             constexpr uint8_t type = str_t<Key> ? 0 : (std::is_signed_v<Key> ? 0b000'01'000 : 0b000'10'000);
-            constexpr uint8_t byte_count = str_t<Key> ? 1 : sizeof(Key);
-            constexpr uint8_t tag = tag::object | type | (byte_count << 5);
+            constexpr uint8_t byte_cnt = str_t<Key> ? 1 : sizeof(Key);
+            constexpr uint8_t tag = tag::object | type | (byte_cnt << 5);
             dump_type(tag, args...);
 
             dump_compressed_int<Opts>(1, args...);
@@ -354,8 +356,8 @@ namespace glz
             using Key = typename T::key_type;
 
             constexpr uint8_t type = str_t<Key> ? 0 : (std::is_signed_v<Key> ? 0b000'01'000 : 0b000'10'000);
-            constexpr uint8_t byte_count = str_t<Key> ? 1 : sizeof(Key);
-            constexpr uint8_t tag = tag::object | type | (byte_count << 5);
+            constexpr uint8_t byte_cnt = str_t<Key> ? 1 : sizeof(Key);
+            constexpr uint8_t tag = tag::object | type | (byte_cnt << 5);
             dump_type(tag, args...);
 
             dump_compressed_int<Opts>(value.size(), args...);
@@ -389,8 +391,8 @@ namespace glz
          GLZ_ALWAYS_INLINE static void op(auto&& value, is_context auto&& ctx, Args&&... args) noexcept
          {
             constexpr uint8_t type = 0;
-            constexpr uint8_t byte_count = 1;
-            constexpr uint8_t tag = tag::object | type | (byte_count << 5);
+            constexpr uint8_t byte_cnt = 1;
+            constexpr uint8_t tag = tag::object | type | (byte_cnt << 5);
             dump_type(tag, args...);
 
             using V = std::decay_t<T>;
@@ -412,7 +414,7 @@ namespace glz
          template <auto Opts, class... Args>
          GLZ_ALWAYS_INLINE static void op(auto&& value, is_context auto&& ctx, Args&&... args) noexcept
          {
-            dump<std::byte(tag::untyped_array)>(args...);
+            dump<std::byte(tag::generic_array)>(args...);
 
             static constexpr auto N = std::tuple_size_v<meta_t<T>>;
             dump_compressed_int<N>(args...);
@@ -432,7 +434,7 @@ namespace glz
          template <auto Opts, class... Args>
          GLZ_ALWAYS_INLINE static void op(auto&& value, is_context auto&& ctx, Args&&... args) noexcept
          {
-            dump<std::byte(tag::untyped_array)>(args...);
+            dump<std::byte(tag::generic_array)>(args...);
 
             static constexpr auto N = std::tuple_size_v<T>;
             dump_compressed_int<N>(args...);
@@ -478,8 +480,8 @@ namespace glz
          static constexpr auto N = std::tuple_size_v<std::decay_t<decltype(groups)>>;
 
          constexpr uint8_t type = 0;
-         constexpr uint8_t byte_count = sizeof(decltype(buffer[0]));
-         constexpr uint8_t tag = tag::object | type | (byte_count << 5);
+         constexpr uint8_t byte_cnt = sizeof(decltype(buffer[0]));
+         constexpr uint8_t tag = tag::object | type | (byte_cnt << 5);
          detail::dump_type(tag, buffer);
 
          detail::dump_compressed_int<N>(buffer);
