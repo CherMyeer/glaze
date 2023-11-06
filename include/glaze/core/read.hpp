@@ -44,7 +44,7 @@ namespace glz
       return std::pair{b, e};
    }
 
-   // For reading json from a std::vector<char>, std::deque<char> and the like
+   // For reading from a contiguous buffer like std::vector<char>
    template <opts Opts>
    [[nodiscard]] inline parse_error read(auto& value, detail::contiguous auto&& buffer, is_context auto&& ctx) noexcept
    {
