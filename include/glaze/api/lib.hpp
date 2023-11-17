@@ -15,6 +15,11 @@
 #endif
 #endif
 
+#if defined(_WIN32) && defined(UNICODE)
+#include <codecvt>
+#include <locale>
+#endif
+
 #ifdef GLAZE_API_ON_WINDOWS
 #ifdef NOMINMAX
 #include <windows.h>
@@ -100,7 +105,12 @@ namespace glz
       bool load_lib(const std::string& path) noexcept
       {
 #ifdef GLAZE_API_ON_WINDOWS
-         lib_t loaded_lib = LoadLibrary(path.c_str());
+          #ifdef UNICODE
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                lib_t loaded_lib = LoadLibrary(converter.from_bytes(path).c_str());
+         #else
+                lib_t loaded_lib = LoadLibrary(path.c_str());
+         #endif
 #else
          lib_t loaded_lib = dlopen(path.c_str(), RTLD_LAZY);
 #endif
